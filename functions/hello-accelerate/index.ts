@@ -1,43 +1,43 @@
 // Import statements
 import { withAccelerate } from "npm:@prisma/extension-accelerate@1.0.0";
 import { PrismaClient } from "../_shared/client/deno/edge.ts";
-// import { withPulse } from "npm:@prisma/extension-pulse";
+import { withPulse } from "npm:@prisma/extension-pulse";
 import { Hono } from "https://deno.land/x/hono@v4.1.0/mod.ts";
 import { upgradeWebSocket } from "https://deno.land/x/hono@v4.1.0/helper.ts";
 
 const app = new Hono();
 
-// app.get(
-//   "/hello-accelerate/ws",
-//   upgradeWebSocket(async (c) => {
-//     const prismaPulse = new PrismaClient().$extends(
-//       withPulse({
-//         apiKey: Deno.env.get("PULSE_API_KEY")!,
-//       })
-//     );
+app.get(
+  "/hello-accelerate/ws",
+  upgradeWebSocket(async (c) => {
+    const prismaPulse = new PrismaClient().$extends(
+      withPulse({
+        apiKey: Deno.env.get("PULSE_API_KEY")!,
+      })
+    );
 
-//     const personStream = await prismaPulse.person.subscribe();
+    const personStream = await prismaPulse.person.subscribe();
 
-//     return {
-//       async onMessage(event, ws) {
-//         if (personStream instanceof Error) {
-//           console.log(personStream);
-//           ws.send("Hey ankur, something happened");
-//         } else {
-//           console.log(`Message from client: ${event.data}`);
-//           for await (const event of personStream) {
-//             ws.send(JSON.stringify(event));
-//           }
-//         }
-//       },
+    return {
+      async onMessage(event, ws) {
+        if (personStream instanceof Error) {
+          console.log(personStream);
+          ws.send("Hey ankur, something happened");
+        } else {
+          console.log(`Message from client: ${event.data}`);
+          for await (const event of personStream) {
+            ws.send(JSON.stringify(event));
+          }
+        }
+      },
 
-//       onClose: () => {
-//         console.log("Connection closed");
-//         personStream.stop();
-//       },
-//     };
-//   })
-// );
+      onClose: () => {
+        console.log("Connection closed");
+        personStream.stop();
+      },
+    };
+  })
+);
 
 app.get("/hello-accelerate/add-user", async (c) => {
   // Create Prisma client
